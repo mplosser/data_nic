@@ -1,0 +1,39 @@
+# Large binary data formats
+*.parquet
+*.zip
+*.ZIP
+*.xpt
+*.pdf
+
+# CSV files (large data)
+*.csv
+
+# Keep directory structure placeholders
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment variables
+.env

@@ -1,13 +1,70 @@
-This repository will acquire data from the national information center, import it, and save it as parquest files for use in various projects.
+# CLAUDE.md
 
-The data is vailable here https://www.ffiec.gov/npw/FinancialReport/DataDownload as zipped csv files.
-There are several datasets, we want separate parquest files for each of them.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Ideally we would download the data and incorporate information about the variables into the datasets much like stata has a variable description field.
+## Project Overview
 
-There is a pdf here (https://www.ffiec.gov/npw/StaticData/DataDownload/NPW%20Data%20Dictionary.pdf) with information about the variables.
+FFIEC National Information Center (NIC) Data Pipeline - automates downloading, processing, and analyzing bank/financial institution data from the FFIEC.
 
-Similar to other repositories in my github that acquire data. It would be nice to have a download file that downlaods the raw data to data/raw a parse file that unzips the data and parses it into parquest files in data/processed (if we can apply variable descriptives this would also do that for the parquest files) and then a summarize file that summarizes the shape of the data for the files we have created (the time period covered, and the number of firms/branches/transformations over time) and finally a cleanup file taht deletes files in an effort to save space. There would then be a requirements and source readme that describes these key steps in the pipeline. 
+## Data Source
 
-If possible review the other data repos we have created together (data_sod data_fry9c data_call) for simialr exercises.
+- **Download URL**: https://www.ffiec.gov/npw/FinancialReport/DataDownload (zipped CSV files)
+- **Data Dictionary**: https://www.ffiec.gov/npw/StaticData/DataDownload/NPW%20Data%20Dictionary.pdf
+- **Datasets**: Multiple datasets available (Attributes, Relationships, Transformations, etc.) - each gets its own parquet file
 
+## Commands
+
+### Setup
+```bash
+python -m venv .venv
+.venv\Scripts\activate          # Windows
+source .venv/bin/activate       # macOS/Linux
+pip install -r requirements.txt
+```
+
+### Full Pipeline
+```bash
+# Download raw data to data/raw/ (manual download required due to bot protection)
+python 01_download.py --manual
+
+# Extract variable dictionary from PDF (optional but recommended)
+python 02_parse_dictionary.py
+
+# Parse ZIP→parquet with variable metadata
+python 03_parse_data.py --input-dir data/raw --output-dir data/processed
+
+# Summarize data coverage
+python 04_summarize.py --input-dir data/processed
+
+# Cleanup raw files (optional)
+python 05_cleanup.py --raw
+```
+
+## Architecture
+
+### Pipeline
+```
+01_download.py → 02_parse_dictionary.py → 03_parse_data.py → 04_summarize.py → 05_cleanup.py
+(raw ZIP)         (var descriptions)       (parquet)          (verification)    (optional)
+```
+
+### Directory Structure
+```
+data/
+├── raw/           # Downloaded ZIP files
+└── processed/     # Parquet files (one per dataset type)
+```
+
+### Key Design Patterns
+
+- **Variable metadata**: Attach descriptions from data dictionary to parquet columns (like Stata variable labels)
+- **Parallelization**: Use `ProcessPoolExecutor` for parsing and summarization
+- **HTTP resilience**: Sessions with retry logic
+- **Dual encoding**: UTF-8 fallback to Latin-1 for CSV files
+
+## Reference Repositories
+
+Pattern follows similar data pipeline repos:
+- `data_sod` - FDIC Summary of Deposits
+- `data_fry9c` - FR Y-9C bank holding company reports
+- `data_call` - Call Reports

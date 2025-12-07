@@ -1,0 +1,9 @@
+# Ignore all data files
+*
+
+# But not the gitkeep placeholders
+!.gitignore
+!raw/
+!processed/
+!raw/.gitkeep
+!processed/.gitkeep
